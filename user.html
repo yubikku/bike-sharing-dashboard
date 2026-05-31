@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Smartify | Rent a Bike</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    :root {
+      --navy: #083d77;
+      --blue: #0c5db3;
+      --soft-blue: #e8f1fb;
+      --green: #1a7f46;
+      --soft-green: #e9f7ef;
+      --orange: #b65e08;
+      --soft-orange: #fff4e5;
+      --red: #bb2626;
+      --soft-red: #ffeded;
+      --text: #142235;
+      --muted: #627187;
+      --border: #d9e2ec;
+      --card: #ffffff;
+      --bg: #f3f6fa;
+      --shadow: 0 8px 24px rgba(23, 40, 58, 0.08);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    button, input { font: inherit; }
+    .hidden { display: none !important; }
+
+    .login-screen {
+      min-height: 100vh;
+      padding: 1.25rem;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(155deg, #083d77 0%, #0d5fb3 46%, #e7f0fa 46%, #f3f6fa 100%);
+    }
+
+    .login-card {
+      width: min(100%, 420px);
+      background: var(--card);
+      border-radius: 26px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--soft-blue);
+      font-size: 1.6rem;
+    }
+
+    .brand h1 { margin: 0; color: var(--navy); font-size: 1.45rem; }
+    .brand p { margin: .16rem 0 0; color: var(--muted); font-size: .9rem; }
+    .login-card h2 { margin: 0 0 .35rem; font-size: 1.45rem; }
+    .subtext { margin: 0 0 1.2rem; color: var(--muted); line-height: 1.45; }
+
+    .form-grid { display: grid; gap: .85rem; }
+    label { display: grid; gap: .35rem; font-weight: 700; color: #2a455f; font-size: .92rem; }
+    .input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      min-height: 48px;
+      padding: .7rem .85rem;
+      background: #fff;
+    }
+    .input:focus { outline: 2px solid #aaccec; border-color: var(--blue); }
+
+    .btn {
+      border: none;
+      min-height: 48px;
+      border-radius: 14px;
+      padding: .7rem 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease;
+    }
+    .btn:active { transform: scale(.985); }
+    .btn:disabled { opacity: .48; cursor: not-allowed; }
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--blue); }
+    .btn-secondary { background: var(--soft-blue); color: var(--navy); }
+    .btn-danger { background: var(--soft-red); color: var(--red); }
+    .btn-full { width: 100%; }
+    .message { min-height: 1.25rem; color: var(--red); font-size: .91rem; font-weight: 700; }
+
+    .app {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 1rem 1rem 4rem;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .8rem;
+      margin-bottom: 1rem;
+    }
+    .topbar .brand { margin: 0; }
+    .topbar .brand-icon { width: 43px; height: 43px; }
+    .user-actions { display: flex; align-items: center; gap: .6rem; }
+    .hello { display: none; color: var(--muted); font-size: .92rem; }
+
+    .hero-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .wallet {
+      color: #fff;
+      border: none;
+      background: linear-gradient(130deg, #083d77 0%, #0f6dcc 100%);
+    }
+    .wallet-label { color: rgba(255,255,255,.8); font-size: .9rem; font-weight: 700; }
+    .wallet-amount { font-size: clamp(2rem, 10vw, 2.7rem); line-height: 1.1; font-weight: 800; margin: .35rem 0 .65rem; }
+    .wallet-row { display: flex; justify-content: space-between; gap: .5rem; color: rgba(255,255,255,.84); font-size: .88rem; }
+    .wallet-row strong { color: #fff; }
+
+    .rent-callout h2 { margin: 0 0 .4rem; color: var(--navy); }
+    .rent-callout p { margin: 0 0 1rem; color: var(--muted); line-height: 1.45; }
+    .scan-btn { display: flex; align-items: center; justify-content: center; gap: .55rem; font-size: 1.05rem; }
+    .scan-icon { font-size: 1.2rem; }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1.15rem 0 .7rem;
+    }
+    .section-title h2 { margin: 0; font-size: 1.16rem; color: var(--navy); }
+    .section-title span { color: var(--muted); font-size: .86rem; }
+
+    .stations-grid { display: grid; gap: .75rem; }
+    .station-card { background: var(--card); border: 1px solid var(--border); border-radius: 17px; padding: .9rem; }
+    .station-header { display: flex; justify-content: space-between; align-items: center; gap: .7rem; margin-bottom: .7rem; }
+    .station-name { font-weight: 800; color: var(--navy); }
+    .station-place { color: var(--muted); font-size: .84rem; margin-top: .15rem; }
+    .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: .3rem .58rem; font-size: .78rem; font-weight: 800; }
+    .pill-good { color: var(--green); background: var(--soft-green); }
+    .pill-none { color: var(--orange); background: var(--soft-orange); }
+    .pill-alert { color: var(--red); background: var(--soft-red); }
+    .slots { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .slot-pill { border: 1px solid var(--border); border-radius: 10px; padding: .37rem .52rem; font-size: .8rem; color: var(--muted); }
+    .slot-pill.available { color: var(--green); background: var(--soft-green); border-color: #c9ead6; }
+    .slot-pill.unavailable { color: #7b8695; background: #f2f4f7; }
+    .slot-pill.alert { color: var(--red); background: var(--soft-red); border-color: #f1c6c6; }
+
+    .trip-card { margin-bottom: 1rem; border-color: #bcd8ef; }
+    .trip-card.active { background: #f5faff; }
+    .trip-card.waiting { background: var(--soft-orange); border-color: #efd19b; }
+    .trip-card.complete { background: var(--soft-green); border-color: #c7e7d3; }
+    .trip-status { display: flex; justify-content: space-between; gap: .7rem; align-items: start; margin-bottom: .8rem; }
+    .trip-status h2 { margin: 0; color: var(--navy); font-size: 1.15rem; }
+    .trip-status p { margin: .25rem 0 0; color: var(--muted); font-size: .9rem; }
+    .trip-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; margin-bottom: .9rem; }
+    .trip-metric { padding: .7rem .55rem; background: white; border: 1px solid var(--border); border-radius: 12px; }
+    .trip-metric-label { color: var(--muted); font-size: .76rem; margin-bottom: .25rem; }
+    .trip-metric-value { font-weight: 800; color: var(--navy); font-size: 1.05rem; }
+    .trip-actions { display: flex; flex-wrap: wrap; gap: .55rem; }
+
+    .status-line {
+      position: fixed;
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      max-width: 560px;
+      margin: auto;
+      padding: .8rem .95rem;
+      border-radius: 13px;
+      color: white;
+      background: #263849;
+      box-shadow: 0 10px 25px rgba(0,0,0,.2);
+      z-index: 20;
+      font-size: .92rem;
+    }
+    .status-line.error { background: var(--red); }
+    .status-line.success { background: var(--green); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: end center;
+      background: rgba(11, 25, 43, .55);
+      padding: 1rem;
+    }
+    .modal {
+      width: min(500px, 100%);
+      max-height: 94vh;
+      overflow: auto;
+      background: white;
+      border-radius: 24px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .modal-head { display: flex; justify-content: space-between; align-items: start; gap: .8rem; margin-bottom: .9rem; }
+    .modal-head h2 { margin: 0; font-size: 1.18rem; color: var(--navy); }
+    .modal-head p { margin: .25rem 0 0; font-size: .88rem; color: var(--muted); }
+    .close-btn { border: none; background: #eff3f8; border-radius: 10px; width: 36px; height: 36px; cursor: pointer; }
+    #qr_reader { width: 100%; min-height: 260px; border-radius: 14px; overflow: hidden; background: #edf2f7; }
+    .manual-fallback { border-top: 1px solid var(--border); margin-top: .8rem; padding-top: .8rem; }
+    .manual-fallback p { margin: 0 0 .55rem; color: var(--muted); font-size: .84rem; }
+    .manual-row { display: flex; gap: .45rem; }
+    .manual-row .input { min-height: 43px; font-size: .87rem; }
+    .selection-card { background: #f4f8fd; border: 1px solid #d6e6f4; border-radius: 14px; padding: .9rem; margin: .65rem 0 1rem; }
+    .selection-card strong { color: var(--navy); }
+    .selection-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .55rem; margin-top: .7rem; }
+    .selection-detail { background: white; border-radius: 10px; padding: .55rem; font-size: .88rem; }
+    .selection-detail span { display: block; color: var(--muted); font-size: .75rem; margin-bottom: .16rem; }
+    .modal-actions { display: flex; gap: .55rem; }
+    .modal-actions .btn { flex: 1; }
+
+    @media (min-width: 720px) {
+      .app { padding: 1.4rem 1.4rem 3rem; }
+      .hello { display: block; }
+      .hero-grid { grid-template-columns: .95fr 1.25fr; }
+      .stations-grid { grid-template-columns: repeat(3, 1fr); }
+      .modal-backdrop { place-items: center; }
+      .card { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-screen" id="login_screen">
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-icon">🚲</div>
+        <div>
+          <h1>Smartify</h1>
+          <p>UP Diliman Bike Sharing</p>
+        </div>
+      </div>
+      <h2>Welcome back</h2>
+      <p class="subtext">Sign in with your prototype demo account to rent and return a bike.</p>
+      <form class="form-grid" id="login_form">
+        <label>Email
+          <input class="input" id="login_email" type="email" autocomplete="username" required>
+        </label>
+        <label>Password
+          <input class="input" id="login_password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="btn btn-primary btn-full" id="login_button" type="submit">Sign In</button>
+        <div class="message" id="login_message" role="alert"></div>
+      </form>
+    </div>
+  </section>
+
+  <main class="app hidden" id="user_app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">🚲</div>
+        <div>
+          <h1>Smartify</h1>
+          <p>Rent a campus bike</p>
+        </div>
+      </div>
+      <div class="user-actions">
+        <div class="hello" id="user_greeting">Hello</div>
+        <button class="btn btn-secondary" id="sign_out_button" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="hero-grid">
+      <article class="card wallet">
+        <div class="wallet-label">Load Balance</div>
+        <div class="wallet-amount" id="wallet_balance">₱100.00</div>
+        <div class="wallet-row">
+          <span id="wallet_subtitle">Available to spend</span>
+          <strong id="wallet_fare_preview">No active fare</strong>
+        </div>
+      </article>
+
+      <article class="card rent-callout" id="rent_callout">
+        <h2>Ready to ride?</h2>
+        <p>Scan the QR code on an occupied dock slot. Remove the bike only after authorization is approved.</p>
+        <button class="btn btn-primary btn-full scan-btn" id="scan_pickup_button" type="button">
+          <span class="scan-icon">▣</span> Scan QR to Rent a Bike
+        </button>
+      </article>
+    </section>
+
+    <section class="card trip-card hidden" id="trip_card" aria-live="polite">
+      <div class="trip-status">
+        <div>
+          <h2 id="trip_heading">Current Trip</h2>
+          <p id="trip_instruction"></p>
+        </div>
+        <span class="pill pill-good" id="trip_status_pill">Active</span>
+      </div>
+      <div class="trip-metrics">
+        <div class="trip-metric">
+          <div class="trip-metric-label">Duration</div>
+          <div class="trip-metric-value" id="trip_duration">00:00</div>
+        </div>
+        <div class="trip-metric">
+          <div class="trip-metric-label">Current Fare</div>
+          <div class="trip-metric-value" id="trip_fare">₱0.00</div>
+        </div>
+        <div class="trip-metric">
+          <div class="trip-metric-label">Balance After Fare</div>
+          <div class="trip-metric-value" id="trip_remaining">₱0.00</div>
+        </div>
+      </div>
+      <div class="trip-actions">
+        <button class="btn btn-primary" id="scan_return_button" type="button">Scan Available Return Slot</button>
+        <button class="btn btn-danger hidden" id="cancel_request_button" type="button">Cancel Request</button>
+      </div>
+    </section>
+
+    <section class="card trip-card complete hidden" id="receipt_card">
+      <div class="trip-status">
+        <div>
+          <h2>Ride completed</h2>
+          <p>Your returned bike was detected and your final fare was deducted.</p>
+        </div>
+        <span class="pill pill-good">Paid</span>
+      </div>
+      <div class="trip-metrics">
+        <div class="trip-metric"><div class="trip-metric-label">Final Fare</div><div class="trip-metric-value" id="receipt_fare">₱0.00</div></div>
+        <div class="trip-metric"><div class="trip-metric-label">Ending Balance</div><div class="trip-metric-value" id="receipt_balance">₱0.00</div></div>
+        <div class="trip-metric"><div class="trip-metric-label">Trip Time</div><div class="trip-metric-value" id="receipt_duration">00:00</div></div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>Available Stations</h2>
+      <span id="live_status">Connecting...</span>
+    </div>
+    <section class="stations-grid" id="stations_grid" aria-label="Bike stations"></section>
+  </main>
+
+  <div class="modal-backdrop hidden" id="scanner_backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="scanner_title">Scan QR Code</h2>
+          <p id="scanner_subtitle">Point your camera at the QR attached to the dock slot.</p>
+        </div>
+        <button class="close-btn" id="scanner_close_button" type="button" aria-label="Close">✕</button>
+      </div>
+      <div id="qr_reader"></div>
+      <div class="manual-fallback">
+        <p>Camera unavailable? Paste a QR payload for testing, such as <strong>station1/slot1</strong>.</p>
+        <div class="manual-row">
+          <input class="input" id="manual_qr_payload" type="text" placeholder="station1/slot1">
+          <button class="btn btn-secondary" id="manual_qr_button" type="button">Use</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="confirmation_backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="confirmation_title">Confirm bike rental</h2>
+          <p id="confirmation_subtitle">Confirm before sending authorization.</p>
+        </div>
+        <button class="close-btn" id="confirmation_close_button" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="selection-card" id="selection_summary"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="confirmation_cancel_button" type="button">Cancel</button>
+        <button class="btn btn-primary" id="confirmation_action_button" type="button">Authorize Rental</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-line hidden" id="toast" role="status"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      browserSessionPersistence,
+      onAuthStateChanged,
+      setPersistence,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      get,
+      set,
+      update,
+      push,
+      runTransaction,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    // This is the same Firebase web application configuration used by index.html.
+    const firebaseConfig = {
+      apiKey: "AIzaSyDP8Un-9W82nZ0P1wx29o3hc7oKOxh2rb4",
+      authDomain: "coe197-bike-sharing.firebaseapp.com",
+      databaseURL: "https://coe197-bike-sharing-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "coe197-bike-sharing",
+      storageBucket: "coe197-bike-sharing.firebasestorage.app",
+      messagingSenderId: "1055379141105",
+      appId: "1:1055379141105:web:1b9bcf1f30a17522cb5450"
+    };
+
+    const STARTING_BALANCE_CENTAVOS = 10000;          // ₱100.00
+    const MINIMUM_REQUIRED_BALANCE_CENTAVOS = 500;    // ₱5.00
+    const UNLOCK_FEE_CENTAVOS = 500;                  // ₱5.00
+    const RATE_PER_STARTED_MINUTE_CENTAVOS = 100;     // ₱1.00/minute
+    const AUTHORIZATION_WAIT_MS = 30000;
+
+    const stationDetails = {
+      station1: { name: "Station 1", location: "Main gate area" },
+      station2: { name: "Station 2", location: "Library entrance" },
+      station3: { name: "Station 3", location: "Engineering building" }
+    };
+
+    const state = {
+      auth: null,
+      db: null,
+      user: null,
+      profile: null,
+      stations: {},
+      activeRentalId: "",
+      activeRental: null,
+      pendingSelection: null,
+      scannerPurpose: "pickup",
+      scanner: null,
+      scannerRunning: false,
+      scanProcessing: false,
+      stationsUnsubscribe: null,
+      profileUnsubscribe: null,
+      rentalUnsubscribe: null,
+      pickupUnsubscribe: null,
+      returnUnsubscribe: null,
+      fareTimer: null,
+      toastTimer: null,
+      handledPageQr: false,
+      watcherKey: "",
+      settling: false,
+      lastReceipt: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function money(centavos) {
+      const safe = Number.isFinite(Number(centavos)) ? Number(centavos) : 0;
+      return new Intl.NumberFormat("en-PH", {
+        style: "currency",
+        currency: "PHP",
+        minimumFractionDigits: 2
+      }).format(safe / 100).replace("PHP", "₱");
+    }
+
+    function formatDuration(milliseconds) {
+      const seconds = Math.max(0, Math.floor(milliseconds / 1000));
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+    }
+
+    function toast(message, type = "", durationMs = 4000) {
+      clearTimeout(state.toastTimer);
+      const node = $("toast");
+      node.textContent = message;
+      node.className = `status-line ${type}`.trim();
+      state.toastTimer = setTimeout(() => node.classList.add("hidden"), durationMs);
+    }
+
+    function setLoginMessage(message) {
+      $("login_message").textContent = message;
+    }
+
+    function storedBalance() {
+      return Number(state.profile?.balanceCentavos ?? STARTING_BALANCE_CENTAVOS);
+    }
+
+    function startedAtOf(rental) {
+      return Number(rental?.startedAt || rental?.startedAtClient || 0);
+    }
+
+    function calculateFareCentavos(rental, now = Date.now()) {
+      const startedAt = startedAtOf(rental);
+      if (!startedAt) return 0;
+      const elapsedMs = Math.max(now - startedAt, 0);
+      const billableMinutes = Math.max(1, Math.ceil(elapsedMs / 60000));
+      return UNLOCK_FEE_CENTAVOS + billableMinutes * RATE_PER_STARTED_MINUTE_CENTAVOS;
+    }
+
+    function isRideCharging(rental) {
+      return rental && (rental.status === "active" || rental.status === "waiting_for_return");
+    }
+
+    function slotLabel(stationId, slotId) {
+      return `${stationDetails[stationId]?.name || stationId} — ${slotId.replace("slot", "Slot ")}`;
+    }
+
+    function showLogin() {
+      $("login_screen").classList.remove("hidden");
+      $("user_app").classList.add("hidden");
+    }
+
+    function showApp() {
+      $("login_screen").classList.add("hidden");
+      $("user_app").classList.remove("hidden");
+    }
+
+    function renderWallet() {
+      const balance = storedBalance();
+      const fare = isRideCharging(state.activeRental) ? calculateFareCentavos(state.activeRental) : 0;
+      const estimatedRemaining = Math.max(balance - fare, 0);
+
+      $("wallet_balance").textContent = money(isRideCharging(state.activeRental) ? estimatedRemaining : balance);
+      $("wallet_subtitle").textContent = isRideCharging(state.activeRental)
+        ? "Estimated remaining balance"
+        : "Available to spend";
+      $("wallet_fare_preview").textContent = isRideCharging(state.activeRental)
+        ? `${money(fare)} current fare`
+        : "No active fare";
+    }
+
+    function renderStations() {
+      const grid = $("stations_grid");
+      grid.innerHTML = "";
+
+      Object.entries(stationDetails).forEach(([stationId, detail]) => {
+        const slots = state.stations?.[stationId]?.slots || {};
+        const slotEntries = ["slot1", "slot2", "slot3"].map((slotId) => ({
+          id: slotId,
+          ...(slots[slotId] || {})
+        }));
+        const available = slotEntries.filter((slot) => slot.bikePresent === true && slot.alertActive !== true).length;
+        const alerts = slotEntries.filter((slot) => slot.alertActive === true).length;
+
+        const card = document.createElement("article");
+        card.className = "station-card";
+        card.innerHTML = `
+          <div class="station-header">
+            <div>
+              <div class="station-name">${detail.name}</div>
+              <div class="station-place">${detail.location}</div>
+            </div>
+            <span class="pill ${alerts ? "pill-alert" : available ? "pill-good" : "pill-none"}">
+              ${alerts ? `${alerts} alert${alerts === 1 ? "" : "s"}` : available ? `${available} available` : "No bikes"}
+            </span>
+          </div>
+          <div class="slots">
+            ${slotEntries.map((slot) => {
+              const cssClass = slot.alertActive === true ? "alert" : slot.bikePresent === true ? "available" : "unavailable";
+              const label = slot.alertActive === true ? "Alert" : slot.bikePresent === true ? "Available" : "Empty";
+              return `<span class="slot-pill ${cssClass}">${slot.id.replace("slot", "Slot ")}: ${label}</span>`;
+            }).join("")}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderTrip() {
+      const rental = state.activeRental;
+      const card = $("trip_card");
+      const scanReturn = $("scan_return_button");
+      const cancelRequest = $("cancel_request_button");
+
+      if (!rental || rental.status === "completed" || rental.status === "cancelled" || rental.status === "expired") {
+        card.classList.add("hidden");
+        $("rent_callout").classList.remove("hidden");
+        renderWallet();
+        return;
+      }
+
+      card.classList.remove("hidden", "waiting", "active");
+      $("rent_callout").classList.add("hidden");
+      scanReturn.classList.add("hidden");
+      cancelRequest.classList.add("hidden");
+
+      const pickup = slotLabel(rental.pickupStationId, rental.pickupSlotId);
+      const now = Date.now();
+      const startedAt = startedAtOf(rental);
+      const fare = calculateFareCentavos(rental, now);
+      const remaining = Math.max(storedBalance() - fare, 0);
+
+      if (rental.status === "waiting_for_removal") {
+        card.classList.add("waiting");
+        $("trip_heading").textContent = "Authorization sent";
+        $("trip_instruction").textContent = `Remove the bike from ${pickup} within 30 seconds.`;
+        $("trip_status_pill").textContent = "Waiting";
+        $("trip_status_pill").className = "pill pill-none";
+        $("trip_duration").textContent = "--:--";
+        $("trip_fare").textContent = "Not started";
+        $("trip_remaining").textContent = money(storedBalance());
+        cancelRequest.classList.remove("hidden");
+      } else if (rental.status === "active") {
+        card.classList.add("active");
+        $("trip_heading").textContent = "Ride in progress";
+        $("trip_instruction").textContent = `Picked up from ${pickup}. Scan an empty dock when ready to return.`;
+        $("trip_status_pill").textContent = "Active";
+        $("trip_status_pill").className = "pill pill-good";
+        $("trip_duration").textContent = formatDuration(now - startedAt);
+        $("trip_fare").textContent = money(fare);
+        $("trip_remaining").textContent = money(remaining);
+        scanReturn.classList.remove("hidden");
+      } else if (rental.status === "waiting_for_return") {
+        card.classList.add("active");
+        const destination = slotLabel(rental.returnStationId, rental.returnSlotId);
+        $("trip_heading").textContent = "Return slot selected";
+        $("trip_instruction").textContent = `Place the bike in ${destination}. Fare stops when the station detects the bike.`;
+        $("trip_status_pill").textContent = "Returning";
+        $("trip_status_pill").className = "pill pill-none";
+        $("trip_duration").textContent = formatDuration(now - startedAt);
+        $("trip_fare").textContent = money(fare);
+        $("trip_remaining").textContent = money(remaining);
+      }
+
+      renderWallet();
+    }
+
+    function startFareClock() {
+      clearInterval(state.fareTimer);
+      state.fareTimer = setInterval(() => {
+        if (isRideCharging(state.activeRental)) {
+          renderTrip();
+        }
+      }, 1000);
+    }
+
+    function clearSlotWatchers() {
+      if (state.pickupUnsubscribe) state.pickupUnsubscribe();
+      if (state.returnUnsubscribe) state.returnUnsubscribe();
+      state.pickupUnsubscribe = null;
+      state.returnUnsubscribe = null;
+      state.watcherKey = "";
+    }
+
+    async function ensureUserProfile(user) {
+      const profileRef = ref(state.db, `/users/${user.uid}`);
+      const fallbackName = user.email?.split("@")[0] || "Demo User";
+
+      await runTransaction(profileRef, (profile) => {
+        if (profile === null) {
+          return {
+            displayName: fallbackName,
+            email: user.email || "",
+            balanceCentavos: STARTING_BALANCE_CENTAVOS,
+            activeRentalId: "",
+            createdAtClient: Date.now()
+          };
+        }
+        return profile;
+      });
+    }
+
+    function startProfileListener() {
+      if (state.profileUnsubscribe) state.profileUnsubscribe();
+
+      state.profileUnsubscribe = onValue(ref(state.db, `/users/${state.user.uid}`), (snapshot) => {
+        state.profile = snapshot.val() || {};
+        const displayName = state.profile.displayName || state.user.email || "User";
+        $("user_greeting").textContent = `Hello, ${displayName}`;
+        renderWallet();
+        handleQrFromPageUrlOnce();
+
+        const rentalId = state.profile.activeRentalId || "";
+        if (rentalId !== state.activeRentalId) {
+          startRentalListener(rentalId);
+        }
+      }, (error) => {
+        console.error("User profile read failed:", error);
+        toast("Unable to read your wallet profile. Check Firebase Rules.", "error", 7000);
+      });
+    }
+
+    function startStationsListener() {
+      if (state.stationsUnsubscribe) state.stationsUnsubscribe();
+      state.stationsUnsubscribe = onValue(ref(state.db, "/stations"), (snapshot) => {
+        state.stations = snapshot.val() || {};
+        $("live_status").textContent = "Live";
+        renderStations();
+        handleQrFromPageUrlOnce();
+      }, (error) => {
+        console.error("Station read failed:", error);
+        $("live_status").textContent = "Unavailable";
+        toast("Unable to read station availability.", "error", 6000);
+      });
+    }
+
+    function startRentalListener(rentalId) {
+      if (state.rentalUnsubscribe) state.rentalUnsubscribe();
+      clearSlotWatchers();
+      state.activeRentalId = rentalId;
+      state.activeRental = null;
+
+      if (!rentalId) {
+        renderTrip();
+        return;
+      }
+
+      state.rentalUnsubscribe = onValue(ref(state.db, `/rentals/${rentalId}`), (snapshot) => {
+        const rental = snapshot.val();
+        if (!rental || rental.userId !== state.user.uid) {
+          toast("Rental record unavailable.", "error");
+          return;
+        }
+        state.activeRental = rental;
+        renderTrip();
+        configureRentalWatcher(rentalId, rental);
+      }, (error) => {
+        console.error("Rental read failed:", error);
+        toast("Unable to read active rental.", "error", 6000);
+      });
+    }
+
+    function configureRentalWatcher(rentalId, rental) {
+      let key = "";
+      if (rental.status === "waiting_for_removal") {
+        key = `pickup:${rental.pickupStationId}:${rental.pickupSlotId}`;
+      } else if (rental.status === "waiting_for_return") {
+        key = `return:${rental.returnStationId}:${rental.returnSlotId}`;
+      }
+      if (!key || key === state.watcherKey) return;
+
+      clearSlotWatchers();
+      state.watcherKey = key;
+
+      if (rental.status === "waiting_for_removal") {
+        state.pickupUnsubscribe = onValue(
+          ref(state.db, `/stations/${rental.pickupStationId}/slots/${rental.pickupSlotId}`),
+          async (snapshot) => {
+            const slot = snapshot.val() || {};
+            if (slot.bikePresent !== true) {
+              await beginRentalAfterRemoval(rentalId);
+            }
+          }
+        );
+      }
+
+      if (rental.status === "waiting_for_return") {
+        state.returnUnsubscribe = onValue(
+          ref(state.db, `/stations/${rental.returnStationId}/slots/${rental.returnSlotId}`),
+          async (snapshot) => {
+            const slot = snapshot.val() || {};
+            if (slot.bikePresent === true) {
+              await settleRental(rentalId);
+            }
+          }
+        );
+      }
+    }
+
+    async function beginRentalAfterRemoval(rentalId) {
+      const rentalRef = ref(state.db, `/rentals/${rentalId}`);
+      const snapshot = await get(rentalRef);
+      const rental = snapshot.val();
+      if (!rental || rental.status !== "waiting_for_removal") return;
+
+      await update(rentalRef, {
+        status: "active",
+        startedAt: serverTimestamp(),
+        startedAtClient: Date.now()
+      });
+      toast("Bike removal detected. Your ride and running fare have started.", "success", 5000);
+    }
+
+    async function settleRental(rentalId) {
+      if (state.settling) return;
+      state.settling = true;
+      try {
+        const rentalRef = ref(state.db, `/rentals/${rentalId}`);
+        const rentalSnapshot = await get(rentalRef);
+        const rental = rentalSnapshot.val();
+        if (!rental || rental.status !== "waiting_for_return") return;
+
+        const endTime = Date.now();
+        const finalFare = calculateFareCentavos(rental, endTime);
+        let previousBalance = storedBalance();
+        let endingBalance = Math.max(previousBalance - finalFare, 0);
+        let deductedAmount = Math.min(previousBalance, finalFare);
+
+        const transaction = await runTransaction(ref(state.db, `/users/${state.user.uid}`), (profile) => {
+          if (!profile) return;
+          if (profile.lastSettledRentalId === rentalId) return profile;
+          if (profile.activeRentalId !== rentalId) return;
+
+          previousBalance = Number(profile.balanceCentavos || 0);
+          endingBalance = Math.max(previousBalance - finalFare, 0);
+          deductedAmount = Math.min(previousBalance, finalFare);
+          profile.balanceCentavos = endingBalance;
+          profile.activeRentalId = "";
+          profile.lastSettledRentalId = rentalId;
+          return profile;
+        });
+
+        if (!transaction.committed) {
+          throw new Error("Balance settlement was not committed.");
+        }
+
+        await update(rentalRef, {
+          status: "completed",
+          endedAt: serverTimestamp(),
+          endedAtClient: endTime,
+          finalChargeCentavos: finalFare,
+          deductedAmountCentavos: deductedAmount,
+          endingBalanceCentavos: endingBalance,
+          unpaidCentavos: Math.max(finalFare - deductedAmount, 0)
+        });
+
+        state.lastReceipt = {
+          fare: finalFare,
+          balance: endingBalance,
+          duration: endTime - startedAtOf(rental)
+        };
+        $("receipt_fare").textContent = money(finalFare);
+        $("receipt_balance").textContent = money(endingBalance);
+        $("receipt_duration").textContent = formatDuration(state.lastReceipt.duration);
+        $("receipt_card").classList.remove("hidden");
+        toast("Ride completed. Fare deducted from your balance.", "success", 6000);
+      } catch (error) {
+        console.error("Settlement failed:", error);
+        toast("Bike detected, but final payment could not be recorded. Please notify the administrator.", "error", 8000);
+      } finally {
+        state.settling = false;
+      }
+    }
+
+    async function cancelPendingRequest() {
+      const rental = state.activeRental;
+      if (!rental || rental.status !== "waiting_for_removal") return;
+      try {
+        const updates = {};
+        updates[`rentals/${state.activeRentalId}/status`] = "cancelled";
+        updates[`rentals/${state.activeRentalId}/cancelledAt`] = serverTimestamp();
+        updates[`users/${state.user.uid}/activeRentalId`] = "";
+        updates[`switches/${rental.pickupStationId}/${rental.pickupSlotId}`] = false;
+        await update(ref(state.db), updates);
+        toast("Rental request cancelled.");
+      } catch (error) {
+        console.error(error);
+        toast("Unable to cancel request.", "error");
+      }
+    }
+
+    function parseQrPayload(rawText) {
+      const text = String(rawText || "").trim();
+      if (!text) throw new Error("The QR code is empty.");
+
+      let stationId = "";
+      let slotId = "";
+      let bikeId = "";
+
+      try {
+        const json = JSON.parse(text);
+        stationId = json.stationId || "";
+        slotId = json.slotId || "";
+        bikeId = json.bikeId || "";
+      } catch (_) {
+        try {
+          const url = new URL(text, window.location.href);
+          stationId = url.searchParams.get("stationId") || "";
+          slotId = url.searchParams.get("slotId") || "";
+          bikeId = url.searchParams.get("bikeId") || "";
+        } catch (_) {
+          // Fall through to compact station/slot text format.
+        }
+      }
+
+      if (!stationId || !slotId) {
+        const compact = text.match(/^(station[1-3])\s*[\/:|-]\s*(slot[1-3])(?:\s*[\/:|-]\s*([\w-]+))?$/i);
+        if (compact) {
+          stationId = compact[1].toLowerCase();
+          slotId = compact[2].toLowerCase();
+          bikeId = compact[3] || "";
+        }
+      }
+
+      if (!Object.hasOwn(stationDetails, stationId) || !/^slot[1-3]$/.test(slotId)) {
+        throw new Error("QR must identify station1–station3 and slot1–slot3.");
+      }
+
+      return {
+        stationId,
+        slotId,
+        bikeId: bikeId || `${stationId}-${slotId}`
+      };
+    }
+
+    async function validateSelection(selection, purpose) {
+      const snapshot = await get(ref(state.db, `/stations/${selection.stationId}/slots/${selection.slotId}`));
+      const slot = snapshot.val() || {};
+
+      if (purpose === "pickup") {
+        if (state.profile?.activeRentalId) throw new Error("You already have an active rental.");
+        if (storedBalance() < MINIMUM_REQUIRED_BALANCE_CENTAVOS) {
+          throw new Error(`A minimum balance of ${money(MINIMUM_REQUIRED_BALANCE_CENTAVOS)} is required.`);
+        }
+        if (slot.alertActive === true) throw new Error("This slot is under alert and cannot be rented.");
+        if (slot.bikePresent !== true) throw new Error("This dock slot does not currently contain a bike.");
+      } else {
+        if (!state.activeRental || !isRideCharging(state.activeRental)) throw new Error("There is no active ride to return.");
+        if (slot.alertActive === true) throw new Error("Choose a return slot without an active alert.");
+        if (slot.bikePresent === true) throw new Error("This return slot is occupied. Scan an empty slot.");
+      }
+    }
+
+    function showConfirmation(selection, purpose) {
+      state.pendingSelection = { ...selection, purpose };
+      const actionText = purpose === "pickup" ? "Authorize Rental" : "Confirm Return Slot";
+      $("confirmation_title").textContent = purpose === "pickup" ? "Confirm bike rental" : "Confirm return dock";
+      $("confirmation_subtitle").textContent = purpose === "pickup"
+        ? "Authorization will be sent to the station controller."
+        : "After confirmation, dock your bike in this empty slot.";
+      $("confirmation_action_button").textContent = actionText;
+      $("selection_summary").innerHTML = `
+        <strong>${slotLabel(selection.stationId, selection.slotId)}</strong>
+        <div class="selection-grid">
+          <div class="selection-detail"><span>Action</span>${purpose === "pickup" ? "Rent bike" : "Return bike"}</div>
+          <div class="selection-detail"><span>Bike reference</span>${selection.bikeId}</div>
+          ${purpose === "pickup" ? `<div class="selection-detail"><span>Minimum balance</span>${money(MINIMUM_REQUIRED_BALANCE_CENTAVOS)}</div><div class="selection-detail"><span>Pricing</span>${money(UNLOCK_FEE_CENTAVOS)} + ${money(RATE_PER_STARTED_MINUTE_CENTAVOS)}/min</div>` : ""}
+        </div>`;
+      $("confirmation_backdrop").classList.remove("hidden");
+    }
+
+    function closeConfirmation() {
+      state.pendingSelection = null;
+      $("confirmation_backdrop").classList.add("hidden");
+    }
+
+    async function authorizePickup(selection) {
+      await validateSelection(selection, "pickup");
+      const rentalRef = push(ref(state.db, "/rentals"));
+      const rentalId = rentalRef.key;
+      const updates = {};
+      updates[`rentals/${rentalId}`] = {
+        userId: state.user.uid,
+        userEmail: state.user.email || "",
+        bikeId: selection.bikeId,
+        pickupStationId: selection.stationId,
+        pickupSlotId: selection.slotId,
+        status: "waiting_for_removal",
+        authorizationMethod: "qr",
+        requestedAt: serverTimestamp(),
+        requestedAtClient: Date.now(),
+        authorizationExpiresAtClient: Date.now() + AUTHORIZATION_WAIT_MS,
+        initialBalanceCentavos: storedBalance(),
+        unlockFeeCentavos: UNLOCK_FEE_CENTAVOS,
+        ratePerStartedMinuteCentavos: RATE_PER_STARTED_MINUTE_CENTAVOS
+      };
+      updates[`users/${state.user.uid}/activeRentalId`] = rentalId;
+      updates[`switches/${selection.stationId}/${selection.slotId}`] = true;
+      await update(ref(state.db), updates);
+      toast("Authorization sent. Remove the bike within 30 seconds.", "success", 6000);
+    }
+
+    async function selectReturnSlot(selection) {
+      await validateSelection(selection, "return");
+      await update(ref(state.db, `/rentals/${state.activeRentalId}`), {
+        status: "waiting_for_return",
+        returnStationId: selection.stationId,
+        returnSlotId: selection.slotId,
+        returnSelectedAt: serverTimestamp(),
+        returnSelectedAtClient: Date.now()
+      });
+      toast("Return slot accepted. Place the bike into the scanned empty slot.", "success", 6000);
+    }
+
+    async function openScanner(purpose) {
+      state.scannerPurpose = purpose;
+      $("scanner_title").textContent = purpose === "pickup" ? "Scan QR to rent" : "Scan an empty return slot";
+      $("scanner_subtitle").textContent = purpose === "pickup"
+        ? "Scan an occupied dock slot QR code."
+        : "Scan any available empty slot in any station.";
+      $("scanner_backdrop").classList.remove("hidden");
+      $("manual_qr_payload").value = "";
+      state.scanProcessing = false;
+
+      if (!window.Html5Qrcode) {
+        toast("Camera scanner library unavailable. Use the manual QR field.", "error", 7000);
+        return;
+      }
+
+      try {
+        state.scanner = new Html5Qrcode("qr_reader");
+        await state.scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 230, height: 230 } },
+          (decodedText) => processScannedText(decodedText, purpose),
+          () => {}
+        );
+        state.scannerRunning = true;
+      } catch (error) {
+        console.error("Camera scanner unavailable:", error);
+        toast("Camera unavailable. Use HTTPS/localhost or paste a test QR payload below.", "error", 7000);
+      }
+    }
+
+    async function stopScanner() {
+      if (state.scanner && state.scannerRunning) {
+        try { await state.scanner.stop(); } catch (_) {}
+      }
+      if (state.scanner) {
+        try { state.scanner.clear(); } catch (_) {}
+      }
+      state.scanner = null;
+      state.scannerRunning = false;
+      state.scanProcessing = false;
+      $("scanner_backdrop").classList.add("hidden");
+      $("qr_reader").innerHTML = "";
+    }
+
+    async function processScannedText(text, purpose = state.scannerPurpose) {
+      if (state.scanProcessing) return;
+      state.scanProcessing = true;
+      try {
+        const selection = parseQrPayload(text);
+        await validateSelection(selection, purpose);
+        await stopScanner();
+        showConfirmation(selection, purpose);
+      } catch (error) {
+        console.error(error);
+        toast(error.message || "Unable to use this QR code.", "error", 6000);
+      } finally {
+        state.scanProcessing = false;
+      }
+    }
+
+    function handleQrFromPageUrlOnce() {
+      if (state.handledPageQr || !state.user || !state.profile || !Object.keys(state.stations).length) return;
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has("stationId") || !params.has("slotId")) return;
+      state.handledPageQr = true;
+      const purpose = state.profile.activeRentalId ? "return" : "pickup";
+      processScannedText(window.location.href, purpose);
+    }
+
+    async function handleSignedInUser(user) {
+      state.user = user;
+      showApp();
+      try {
+        await ensureUserProfile(user);
+        startProfileListener();
+        startStationsListener();
+        startFareClock();
+      } catch (error) {
+        console.error("User setup failed:", error);
+        toast("Signed in, but your wallet profile could not be created. Check Firebase Rules.", "error", 8000);
+      }
+    }
+
+    function clearListeners() {
+      [state.stationsUnsubscribe, state.profileUnsubscribe, state.rentalUnsubscribe].forEach((unsubscribe) => {
+        if (unsubscribe) unsubscribe();
+      });
+      clearSlotWatchers();
+      clearInterval(state.fareTimer);
+      state.stationsUnsubscribe = null;
+      state.profileUnsubscribe = null;
+      state.rentalUnsubscribe = null;
+      state.activeRentalId = "";
+      state.activeRental = null;
+      state.profile = null;
+    }
+
+    async function initializeFirebase() {
+      const app = initializeApp(firebaseConfig);
+      state.auth = getAuth(app);
+      state.db = getDatabase(app);
+      await setPersistence(state.auth, browserSessionPersistence);
+
+      onAuthStateChanged(state.auth, async (user) => {
+        if (!user) {
+          state.user = null;
+          clearListeners();
+          showLogin();
+          return;
+        }
+        await handleSignedInUser(user);
+      });
+    }
+
+    $("login_form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = $("login_button");
+      button.disabled = true;
+      button.textContent = "Signing in...";
+      setLoginMessage("");
+      try {
+        await signInWithEmailAndPassword(
+          state.auth,
+          $("login_email").value.trim(),
+          $("login_password").value
+        );
+        $("login_password").value = "";
+      } catch (error) {
+        console.error(error);
+        setLoginMessage("Unable to sign in with this demo account.");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Sign In";
+      }
+    });
+
+    $("sign_out_button").addEventListener("click", async () => {
+      await stopScanner();
+      await signOut(state.auth);
+    });
+    $("scan_pickup_button").addEventListener("click", () => openScanner("pickup"));
+    $("scan_return_button").addEventListener("click", () => openScanner("return"));
+    $("scanner_close_button").addEventListener("click", stopScanner);
+    $("manual_qr_button").addEventListener("click", () => processScannedText($("manual_qr_payload").value));
+    $("confirmation_close_button").addEventListener("click", closeConfirmation);
+    $("confirmation_cancel_button").addEventListener("click", closeConfirmation);
+    $("confirmation_action_button").addEventListener("click", async () => {
+      const selection = state.pendingSelection;
+      if (!selection) return;
+      const button = $("confirmation_action_button");
+      button.disabled = true;
+      try {
+        if (selection.purpose === "pickup") await authorizePickup(selection);
+        else await selectReturnSlot(selection);
+        closeConfirmation();
+      } catch (error) {
+        console.error(error);
+        toast(error.message || "Action failed.", "error", 7000);
+      } finally {
+        button.disabled = false;
+      }
+    });
+    $("cancel_request_button").addEventListener("click", cancelPendingRequest);
+
+    initializeFirebase().catch((error) => {
+      console.error(error);
+      setLoginMessage("Unable to initialize Firebase.");
+    });
+  </script>
+</body>
+</html>
