@@ -214,93 +214,6 @@
       overflow-wrap: break-word;
     }
 
-
-    .geofence-card {
-      width: 100%;
-      border-radius: 8px;
-      padding: clamp(1rem, 1.8vw, 1.4rem);
-      margin-bottom: 1.3rem;
-      background: #f1f6fb;
-      border: 1px solid #bfd0e6;
-    }
-
-    .geofence-card.outside {
-      background: #fff4f4;
-      border-color: #c62828;
-    }
-
-    .geofence-card.stale {
-      background: #fff8ed;
-      border-color: #d97706;
-    }
-
-    .geofence-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.8rem;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-    }
-
-    .geofence-title {
-      color: #2f4f6f;
-      font-size: clamp(1rem, 1.2vw, 1.15rem);
-      font-weight: 700;
-      margin-bottom: 0.35rem;
-    }
-
-    .geofence-state {
-      font-size: clamp(1.3rem, 2vw, 1.85rem);
-      color: #1b5e20;
-      font-weight: 700;
-    }
-
-    .geofence-state.outside {
-      color: #c62828;
-    }
-
-    .geofence-state.stale {
-      color: #9a5800;
-    }
-
-    .geofence-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.65rem;
-      margin-bottom: 0.9rem;
-    }
-
-    .geofence-metric {
-      background: rgba(255,255,255,0.76);
-      border: 1px solid #d2d7de;
-      border-radius: 8px;
-      padding: 0.7rem;
-    }
-
-    .geofence-metric-label {
-      color: #4e5968;
-      font-size: 0.88rem;
-      margin-bottom: 0.3rem;
-    }
-
-    .geofence-metric-value {
-      color: #003b7a;
-      font-size: 1.18rem;
-      font-weight: 700;
-      overflow-wrap: break-word;
-    }
-
-    .geofence-note {
-      color: #4e5968;
-      line-height: 1.45;
-    }
-
-    .status-stale {
-      color: #9a5800;
-      background: #fff0d7;
-      border-color: #e4c28d;
-    }
-
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -627,8 +540,7 @@
     }
 
     @media (max-width: 900px) {
-      .summary-grid,
-      .geofence-grid {
+      .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
@@ -658,13 +570,8 @@
       }
 
       .summary-grid,
-      .station-stats,
-      .geofence-grid {
+      .station-stats {
         grid-template-columns: 1fr;
-      }
-
-      .geofence-header {
-        display: grid;
       }
 
       .slot-table-header {
@@ -742,44 +649,6 @@
       </div>
     </section>
 
-
-    <section class="geofence-card" id="geofence_card" aria-label="Bike geofence monitor">
-      <div class="geofence-header">
-        <div>
-          <div class="geofence-title">Bike 1 Geofence Monitor</div>
-          <div class="geofence-state" id="geofence_state">Waiting for telemetry...</div>
-        </div>
-
-        <span class="status-chip status-warning" id="geofence_connection_chip">No Data</span>
-      </div>
-
-      <div class="geofence-grid">
-        <div class="geofence-metric">
-          <div class="geofence-metric-label">Raw RSSI</div>
-          <div class="geofence-metric-value" id="geofence_raw_rssi">-- dBm</div>
-        </div>
-
-        <div class="geofence-metric">
-          <div class="geofence-metric-label">Filtered RSSI</div>
-          <div class="geofence-metric-value" id="geofence_smoothed_rssi">-- dBm</div>
-        </div>
-
-        <div class="geofence-metric">
-          <div class="geofence-metric-label">Boundary Alert</div>
-          <div class="geofence-metric-value" id="geofence_alert_status">--</div>
-        </div>
-
-        <div class="geofence-metric">
-          <div class="geofence-metric-label">Decision Source</div>
-          <div class="geofence-metric-value" id="geofence_decision_source">--</div>
-        </div>
-      </div>
-
-      <div class="geofence-note" id="geofence_note">
-        Waiting for ESP-NOW telemetry from the bike controller.
-      </div>
-    </section>
-
     <section class="summary-grid" aria-label="Dashboard summary">
       <div class="metric">
         <div class="metric-label">On-Rent</div>
@@ -828,7 +697,6 @@
     let db;
     let auth;
     let stationsUnsubscribe = null;
-    let bikeUnsubscribe = null;
     let idleTimerId = null;
     let loginSubmitted = false;
 
@@ -923,10 +791,9 @@
     function normalizeSlot(slot, fallbackSlot) {
       return {
         ...fallbackSlot,
-        bikePresent: slot?.bikePresent === true,
-        buttonAuthorized: slot?.buttonAuthorized === true,
-        authorizationSource: typeof slot?.authorizationSource === "string" ? slot.authorizationSource : "",
-        alertActive: slot?.alertActive === true,
+        bikePresent: Boolean(slot?.bikePresent),
+        buttonAuthorized: Boolean(slot?.buttonAuthorized),
+        alertActive: Boolean(slot?.alertActive),
         alertMessage: typeof slot?.alertMessage === "string" ? slot.alertMessage : "No alert"
       };
     }
@@ -966,12 +833,6 @@
             stationsUnsubscribe = null;
           }
 
-          if (bikeUnsubscribe) {
-            bikeUnsubscribe();
-            bikeUnsubscribe = null;
-          }
-
-          renderGeofenceTelemetry(null);
           showLogin();
           return;
         }
@@ -984,7 +845,6 @@
         showDashboard();
         setLoginMessage("");
         startStationListener();
-        startBikeListener();
         resetIdleTimer();
       });
     }
@@ -1001,104 +861,6 @@
           console.error(error);
           setConnectionStatus("Firebase Error");
         });
-    }
-
-
-    function renderGeofenceTelemetry(bikeData = null) {
-      const card = document.getElementById("geofence_card");
-      const stateText = document.getElementById("geofence_state");
-      const connectionChip = document.getElementById("geofence_connection_chip");
-      const rawRssi = document.getElementById("geofence_raw_rssi");
-      const smoothedRssi = document.getElementById("geofence_smoothed_rssi");
-      const alertStatus = document.getElementById("geofence_alert_status");
-      const decisionSource = document.getElementById("geofence_decision_source");
-      const note = document.getElementById("geofence_note");
-
-      card.classList.remove("outside", "stale");
-      stateText.classList.remove("outside", "stale");
-
-      if (!bikeData || Object.keys(bikeData).length === 0) {
-        stateText.textContent = "Waiting for telemetry...";
-        connectionChip.textContent = "No Data";
-        connectionChip.className = "status-chip status-warning";
-        rawRssi.textContent = "-- dBm";
-        smoothedRssi.textContent = "-- dBm";
-        alertStatus.textContent = "--";
-        decisionSource.textContent = "--";
-        note.textContent = "No bike geofence data has been published to Firebase yet.";
-        return;
-      }
-
-      const connected = bikeData.connected === true;
-      const boundaryAlert = bikeData.boundaryAlert === true;
-      const heldDueToLinkLoss = bikeData.stateHeldDueToLinkLoss === true;
-      const geofenceState = String(bikeData.geofenceState || "unknown");
-      const source = String(bikeData.decisionSource || "unknown");
-
-      if (boundaryAlert) {
-        card.classList.add("outside");
-        stateText.classList.add("outside");
-        stateText.textContent = "Outside Simulated Boundary";
-      } else if (heldDueToLinkLoss) {
-        card.classList.add("stale");
-        stateText.classList.add("stale");
-        stateText.textContent = "Holding Last Confirmed State";
-      } else if (geofenceState === "inside") {
-        stateText.textContent = "Inside Simulated Boundary";
-      } else {
-        stateText.textContent = "State Unknown";
-      }
-
-      if (connected) {
-        connectionChip.textContent = "Connected";
-        connectionChip.className = "status-chip status-normal";
-      } else {
-        connectionChip.textContent = "Connection Stale";
-        connectionChip.className = "status-chip status-stale";
-      }
-
-      rawRssi.textContent = Number.isFinite(bikeData.lastRssi)
-        ? `${bikeData.lastRssi} dBm`
-        : "-- dBm";
-
-      smoothedRssi.textContent = Number.isFinite(bikeData.smoothedRssi)
-        ? `${bikeData.smoothedRssi} dBm`
-        : "-- dBm";
-
-      alertStatus.textContent = boundaryAlert ? "ACTIVE" : "Clear";
-      decisionSource.textContent = source
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, (character) => character.toUpperCase());
-
-      if (heldDueToLinkLoss) {
-        note.textContent = "ESP-NOW communication is stale. The system is retaining the last confirmed boundary state and is not generating a false geofence alert from connection loss.";
-      } else if (boundaryAlert && source === "manual_boundary_switch") {
-        note.textContent = "Boundary alert was activated using the bike-side manual simulation switch.";
-      } else if (boundaryAlert) {
-        note.textContent = "RSSI remained beyond the configured proximity threshold and triggered the simulated boundary alert.";
-      } else {
-        note.textContent = "RSSI-based proximity monitoring is active. No simulated boundary violation is detected.";
-      }
-    }
-
-    function startBikeListener() {
-      if (bikeUnsubscribe) {
-        bikeUnsubscribe();
-      }
-
-      bikeUnsubscribe = onValue(
-        ref(db, "/bikes/bike1"),
-        (snapshot) => {
-          const bikeData = snapshot.val() || {};
-          console.log("[Firebase /bikes/bike1 update]", bikeData);
-          renderGeofenceTelemetry(bikeData);
-        },
-        (error) => {
-          console.error("[Firebase /bikes/bike1 read error]", error);
-          document.getElementById("geofence_note").textContent =
-            "Unable to read bike geofence telemetry from Firebase.";
-        }
-      );
     }
 
     function updateClock() {
@@ -1337,9 +1099,7 @@
     function renderSlotRow(station, slot) {
       const presenceText = slot.bikePresent ? "Bike present" : "Empty";
       const presenceClass = slot.bikePresent ? "presence-present" : "";
-      const authText = slot.buttonAuthorized
-        ? `Authorized${slot.authorizationSource ? ` (${slot.authorizationSource.toUpperCase()})` : ""}`
-        : "Not authorized";
+      const authText = slot.buttonAuthorized ? "Authorized" : "Not authorized";
       const disabledAttribute = slot.alertActive ? "" : "disabled";
       const buttonClass = slot.alertActive ? "btn btn-reset-alert" : "btn";
       const slotStatus = getSlotStatusMessage(slot);
