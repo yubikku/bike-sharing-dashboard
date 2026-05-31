@@ -301,113 +301,6 @@
       border-color: #e4c28d;
     }
 
-    .wallet-card {
-      width: 100%;
-      border-radius: 8px;
-      padding: clamp(1rem, 1.8vw, 1.4rem);
-      margin-bottom: 1.3rem;
-      background: #f7f7f7;
-      border: 1px solid #d2d7de;
-    }
-
-    .wallet-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.8rem;
-      margin-bottom: 1rem;
-    }
-
-    .wallet-title {
-      margin: 0.1rem 0 0.25rem;
-      color: #003b7a;
-      font-size: clamp(1.3rem, 2vw, 1.7rem);
-      font-weight: 700;
-    }
-
-    .wallet-description {
-      color: #4e5968;
-      line-height: 1.4;
-    }
-
-    .wallet-grid {
-      display: grid;
-      grid-template-columns: minmax(15rem, 2fr) minmax(9rem, 1fr) minmax(11rem, 1fr) auto;
-      gap: 0.75rem;
-      align-items: end;
-    }
-
-    .wallet-field {
-      display: grid;
-      gap: 0.36rem;
-      color: #2f4f6f;
-      font-weight: 700;
-    }
-
-    .wallet-input {
-      width: 100%;
-      min-height: 2.7rem;
-      border: 1px solid #c7ced8;
-      border-radius: 8px;
-      padding: 0.65rem 0.75rem;
-      background: #ffffff;
-      color: #003b7a;
-      font-size: 1rem;
-    }
-
-    .wallet-balance {
-      min-height: 2.7rem;
-      display: flex;
-      align-items: center;
-      padding: 0.65rem 0.75rem;
-      border: 1px solid #bfd0e6;
-      border-radius: 8px;
-      background: #f1f6fb;
-      color: #003b7a;
-      font-size: 1.12rem;
-      font-weight: 700;
-    }
-
-    .wallet-quick-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.55rem;
-      margin-top: 0.85rem;
-      align-items: center;
-    }
-
-    .wallet-quick-label {
-      color: #4e5968;
-      font-weight: 700;
-      margin-right: 0.2rem;
-    }
-
-    .btn-secondary {
-      border: 1px solid #bfd0e6;
-      background: #ffffff;
-      color: #003b7a;
-    }
-
-    .btn-secondary:hover {
-      background: #e9f1fa;
-    }
-
-    .wallet-message {
-      min-height: 1.35rem;
-      margin-top: 0.8rem;
-      line-height: 1.4;
-      color: #4e5968;
-      font-weight: 700;
-    }
-
-    .wallet-message.success {
-      color: #1b5e20;
-    }
-
-    .wallet-message.error {
-      color: #c62828;
-    }
-
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -745,14 +638,6 @@
     }
 
     @media (max-width: 640px) {
-      .wallet-header {
-        display: grid;
-      }
-
-      .wallet-grid {
-        grid-template-columns: 1fr;
-      }
-
       .recommendation-card {
         display: grid;
       }
@@ -895,53 +780,6 @@
       </div>
     </section>
 
-    <section class="wallet-card" aria-label="Student load top up">
-      <div class="wallet-header">
-        <div>
-          <div class="panel-label">Student Load Management</div>
-          <div class="wallet-title">Top Up User Balance</div>
-          <div class="wallet-description">
-            Select a student wallet and add load. Students appear here after their first successful login to the user page.
-          </div>
-        </div>
-        <span class="status-chip status-warning" id="wallet_user_count">No Users</span>
-      </div>
-
-      <div class="wallet-grid">
-        <label class="wallet-field" for="wallet_user_select">
-          Student User
-          <select class="wallet-input" id="wallet_user_select">
-            <option value="">No user profiles available</option>
-          </select>
-        </label>
-
-        <div class="wallet-field">
-          Current Balance
-          <div class="wallet-balance" id="wallet_selected_balance">--</div>
-        </div>
-
-        <label class="wallet-field" for="wallet_topup_amount">
-          Top-up Amount (PHP)
-          <input class="wallet-input" id="wallet_topup_amount" type="number" min="1" step="1" value="100">
-        </label>
-
-        <button class="btn" id="wallet_topup_button" type="button" disabled>
-          Apply Top Up
-        </button>
-      </div>
-
-      <div class="wallet-quick-actions" aria-label="Preset top up amounts">
-        <span class="wallet-quick-label">Quick amount:</span>
-        <button class="btn btn-secondary" type="button" data-wallet-amount="20">₱20</button>
-        <button class="btn btn-secondary" type="button" data-wallet-amount="50">₱50</button>
-        <button class="btn btn-secondary" type="button" data-wallet-amount="100">₱100</button>
-      </div>
-
-      <div class="wallet-message" id="wallet_message" role="status">
-        Sign in as the administrator to load student wallet profiles.
-      </div>
-    </section>
-
     <section class="summary-grid" aria-label="Dashboard summary">
       <div class="metric">
         <div class="metric-label">On-Rent</div>
@@ -971,7 +809,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, inMemoryPersistence, onAuthStateChanged, setPersistence, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getDatabase, ref, onValue, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDP8Un-9W82nZ0P1wx29o3hc7oKOxh2rb4",
@@ -991,8 +829,6 @@
     let auth;
     let stationsUnsubscribe = null;
     let bikeUnsubscribe = null;
-    let usersUnsubscribe = null;
-    let userProfiles = {};
     let idleTimerId = null;
     let loginSubmitted = false;
 
@@ -1135,13 +971,6 @@
             bikeUnsubscribe = null;
           }
 
-          if (usersUnsubscribe) {
-            usersUnsubscribe();
-            usersUnsubscribe = null;
-          }
-
-          userProfiles = {};
-          renderUserTopUpPanel();
           renderGeofenceTelemetry(null);
           showLogin();
           return;
@@ -1156,7 +985,6 @@
         setLoginMessage("");
         startStationListener();
         startBikeListener();
-        startUsersListener();
         resetIdleTimer();
       });
     }
@@ -1271,198 +1099,6 @@
             "Unable to read bike geofence telemetry from Firebase.";
         }
       );
-    }
-
-    function formatPesoFromCentavos(centavos) {
-      const amount = Number(centavos || 0) / 100;
-      return new Intl.NumberFormat("en-PH", {
-        style: "currency",
-        currency: "PHP",
-        minimumFractionDigits: 2
-      }).format(amount);
-    }
-
-    function setWalletMessage(message, type = "") {
-      const element = document.getElementById("wallet_message");
-      element.textContent = message;
-      element.className = `wallet-message ${type}`.trim();
-    }
-
-    function getSelectedUserProfile() {
-      const uid = document.getElementById("wallet_user_select").value;
-      if (!uid || !userProfiles[uid]) {
-        return null;
-      }
-
-      return { uid, ...userProfiles[uid] };
-    }
-
-    function updateSelectedUserBalance() {
-      const selectedUser = getSelectedUserProfile();
-      const balanceElement = document.getElementById("wallet_selected_balance");
-      const button = document.getElementById("wallet_topup_button");
-
-      if (!selectedUser) {
-        balanceElement.textContent = "--";
-        button.disabled = true;
-        return;
-      }
-
-      balanceElement.textContent = formatPesoFromCentavos(selectedUser.balanceCentavos);
-      button.disabled = false;
-    }
-
-    function renderUserTopUpPanel() {
-      const select = document.getElementById("wallet_user_select");
-      const countChip = document.getElementById("wallet_user_count");
-      const previouslySelectedUid = select.value;
-
-      const users = Object.entries(userProfiles)
-        .filter(([, profile]) => profile && typeof profile === "object")
-        .sort(([, a], [, b]) => {
-          const aLabel = String(a.displayName || a.email || "").toLowerCase();
-          const bLabel = String(b.displayName || b.email || "").toLowerCase();
-          return aLabel.localeCompare(bLabel);
-        });
-
-      select.innerHTML = "";
-
-      if (users.length === 0) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = "No user profiles available";
-        select.appendChild(option);
-        select.disabled = true;
-        countChip.textContent = "No Users";
-        countChip.className = "status-chip status-warning";
-        updateSelectedUserBalance();
-        setWalletMessage(
-          "No wallet profiles found. Ask the student to sign in to user.html once to create their ₱100.00 demo wallet."
-        );
-        return;
-      }
-
-      users.forEach(([uid, profile]) => {
-        const option = document.createElement("option");
-        const label = profile.displayName || profile.email || uid;
-        const secondary = profile.displayName && profile.email ? ` (${profile.email})` : "";
-        option.value = uid;
-        option.textContent = `${label}${secondary}`;
-        select.appendChild(option);
-      });
-
-      select.disabled = false;
-      select.value = users.some(([uid]) => uid === previouslySelectedUid)
-        ? previouslySelectedUid
-        : users[0][0];
-
-      countChip.textContent = `${users.length} User${users.length === 1 ? "" : "s"}`;
-      countChip.className = "status-chip status-normal";
-
-      updateSelectedUserBalance();
-    }
-
-    function startUsersListener() {
-      if (usersUnsubscribe) {
-        usersUnsubscribe();
-      }
-
-      usersUnsubscribe = onValue(
-        ref(db, "/users"),
-        (snapshot) => {
-          userProfiles = snapshot.val() || {};
-          renderUserTopUpPanel();
-        },
-        (error) => {
-          console.error("[Firebase /users read error]", error);
-          userProfiles = {};
-          renderUserTopUpPanel();
-          setWalletMessage(
-            "Unable to read student wallet profiles. Check the administrator database permissions.",
-            "error"
-          );
-        }
-      );
-    }
-
-    async function topUpSelectedUserBalance() {
-      const selectedUser = getSelectedUserProfile();
-      const amountInput = document.getElementById("wallet_topup_amount");
-      const button = document.getElementById("wallet_topup_button");
-      const amountPesos = Number(amountInput.value);
-      const amountCentavos = Math.round(amountPesos * 100);
-
-      if (!selectedUser) {
-        setWalletMessage("Select a student profile before applying a top up.", "error");
-        return;
-      }
-
-      if (!Number.isFinite(amountPesos) || !Number.isInteger(amountCentavos) || amountCentavos <= 0) {
-        setWalletMessage("Enter a valid positive top-up amount.", "error");
-        return;
-      }
-
-      if (amountCentavos > 1000000) {
-        setWalletMessage("The top-up amount is too large for this prototype demo.", "error");
-        return;
-      }
-
-      button.disabled = true;
-      button.textContent = "Applying...";
-      setConnectionStatus("Applying Top Up");
-      setWalletMessage("Applying balance top up...");
-
-      try {
-        const balanceReference = ref(db, `/users/${selectedUser.uid}/balanceCentavos`);
-        const result = await runTransaction(balanceReference, (currentBalance) => {
-          const numericBalance = Number(currentBalance);
-          const safeBalance = Number.isFinite(numericBalance) && numericBalance >= 0
-            ? Math.trunc(numericBalance)
-            : 0;
-
-          return safeBalance + amountCentavos;
-        });
-
-        if (!result.committed) {
-          throw new Error("The balance transaction was not committed.");
-        }
-
-        const newBalance = Number(result.snapshot.val() || 0);
-        const userLabel = selectedUser.displayName || selectedUser.email || selectedUser.uid;
-
-        setWalletMessage(
-          `Top up complete. Added ${formatPesoFromCentavos(amountCentavos)} to ${userLabel}. New balance: ${formatPesoFromCentavos(newBalance)}.`,
-          "success"
-        );
-        setConnectionStatus("Firebase Live");
-      } catch (error) {
-        console.error("[Firebase balance top up error]", error);
-        setWalletMessage(
-          "Top up failed. Confirm that the signed-in administrator is permitted to write user balances.",
-          "error"
-        );
-        setConnectionStatus("Top Up Failed");
-      } finally {
-        button.textContent = "Apply Top Up";
-        updateSelectedUserBalance();
-      }
-    }
-
-    function bindWalletTopUpControls() {
-      document.getElementById("wallet_user_select").addEventListener("change", () => {
-        updateSelectedUserBalance();
-        setWalletMessage("");
-      });
-
-      document.getElementById("wallet_topup_button").addEventListener("click", () => {
-        topUpSelectedUserBalance();
-      });
-
-      document.querySelectorAll("[data-wallet-amount]").forEach((button) => {
-        button.addEventListener("click", () => {
-          document.getElementById("wallet_topup_amount").value = button.dataset.walletAmount;
-        });
-      });
     }
 
     function updateClock() {
@@ -1875,7 +1511,6 @@
     bindLoginForm();
     bindRegisteredBikeControl();
     bindSignOutButton();
-    bindWalletTopUpControls();
     bindIdleTracking();
     startFirebase();
     setInterval(updateClock, 1000);
