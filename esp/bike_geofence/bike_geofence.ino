@@ -32,7 +32,7 @@ constexpr char BIKE_ID[] = "bike1";
 uint8_t STATION_MAC[6] = {0x00, 0x4B, 0x12, 0x23, 0x98, 0x4C};
 
 // Replace with the channel printed by the station after it connects to Wi-Fi.
-constexpr uint8_t ESPNOW_CHANNEL = 11;
+constexpr uint8_t ESPNOW_CHANNEL = 5;
 
 // Safe GPIO choices for ESP32-DevKitC V4.
 constexpr uint8_t BOUNDARY_SWITCH_PIN = 25; // Switch/button to GND; LOW forces outside.
